@@ -10,7 +10,7 @@ python -m venv /venv/
 ```
 Activate it
 ```
-(linux) source venv/bin/activate
+(linux) source ./venv/bin/activate
 ```
 Install requirements into the venv
 ```
