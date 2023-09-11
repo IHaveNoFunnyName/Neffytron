@@ -4,10 +4,9 @@ from dotenv import load_dotenv
 import discord
 from discord.ext import commands
 
-# Do I have to do this? Is there a way to like have python default import a .py? maybe that's what __init__.py is for?
-# I don't understand how this wasn't immediately answered via google.
-from settings.settings import Settings
-from lobby.lobby import Lobby
+from neffytron import Settings, Lobby
+
+
 
 def run(token):
     intents = discord.Intents.default()
@@ -21,9 +20,11 @@ def run(token):
         print(f"Logged in as {bot.user}\nSetting up cogs")
         await bot.add_cog(Settings(bot))
         await bot.add_cog(Lobby(bot))
-        print('Set up cogs')
+        print("Set up cogs")
+
     bot.run(token)
+
 
 if __name__ == "__main__":
     load_dotenv()
-    run(os.getenv('TOKEN'))
+    run(os.getenv("TOKEN"))
