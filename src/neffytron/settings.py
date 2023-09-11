@@ -1,11 +1,10 @@
 import asyncio
-from pymongo import MongoClient
-from discord.ext import commands
-from discord.ext.commands import Context
 import discord
 import os
-
+from discord.ext import commands
+from discord.ext.commands import Context
 from neffytron import confirm
+from pymongo import MongoClient
 
 
 # Type hinting is getting completely lost, presumably because it goes through get_cog and turned into Any

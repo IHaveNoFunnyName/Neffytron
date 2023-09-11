@@ -1,6 +1,4 @@
-import settings
-import lobby
-import utils
-from utils import confirm as confirm
-from settings import Settings as Settings
-from lobby import Lobby as Lobby
+# Import some classes and functions to the neffytron namespace
+from neffytron.lobby import Lobby
+from neffytron.settings import Settings
+from neffytron.utils import confirm as confirm

@@ -1,8 +1,8 @@
-import urllib.parse
-import requests
-from discord.ext.commands import Cog
 import discord
 import re
+import requests
+import urllib.parse
+from discord.ext.commands import Cog
 
 
 def shorten(url_long):
