@@ -16,3 +16,5 @@ requests==2.31.0
 supervisor==4.2.5
 urllib3==1.26.6
 yarl==1.8.2
+neffytron
+setuptools==68.2.0
