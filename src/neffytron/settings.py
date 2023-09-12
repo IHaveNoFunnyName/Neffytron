@@ -1,5 +1,5 @@
 import os
-from typing import Any
+from typing import Any, Optional
 
 import discord
 import neffytron
@@ -146,9 +146,9 @@ class ModuleSettings:
 
     def is_admin(
         self,
-        ctx: commands.Context | None = None,
-        guild: discord.Guild | None = None,
-        member: discord.Member | None = None,
+        ctx: Optional[commands.Context] = None,
+        guild: Optional[discord.Guild] = None,
+        member: Optional[discord.Member] = None,
     ):
         if ctx:
             server = ctx.guild
