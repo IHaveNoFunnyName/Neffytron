@@ -22,7 +22,7 @@ def run(token: str):
 
     bot.run(token)
 
-    if __name__ == "__main__":
-        load_dotenv()
-        if os_token := os.getenv("TOKEN"):
-            run(os_token)
+if __name__ == "__main__":
+    load_dotenv()
+    if os_token := os.getenv("TOKEN"):
+        run(os_token)
