@@ -1,7 +1,9 @@
 import asyncio
 
+from discord.ext import commands
 
-async def confirm(message, success, fail, ctx):
+
+async def confirm(message, success, fail, ctx: commands.Context):
     msg = await message()
     await msg.add_reaction("<:GreenTick:751664729449300081>")
     await msg.add_reaction("<:RedCross:751664777821945966>")
