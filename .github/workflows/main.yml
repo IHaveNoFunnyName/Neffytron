@@ -20,6 +20,6 @@ jobs:
           source ./venv/bin/activate
           git fetch
           git reset --hard origin/master
-          pip install -r requirements.txt
+          pip install .
           nvm use 16.15.1
           pm2 reload neffytron

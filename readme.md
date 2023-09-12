@@ -16,6 +16,11 @@ Install requirements into the venv
 ```
 pip install -r requirements.txt
 ```
+
+Install the neffytron package into the venv
+```
+pip install -e .
+```
 Intstall mongodb and set it up
 
 Copy `.env.example` to `.env` and fill it out
