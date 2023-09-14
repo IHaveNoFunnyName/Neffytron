@@ -8,7 +8,7 @@ from discord.ext import commands
 import discord
 import os
 
-from .nodes import DB_Node, view_builder, Node
+from .nodes import Context, ModuleSettings, view_builder, Node
 
 
 class Settings(commands.Cog):
@@ -40,7 +40,7 @@ class Settings(commands.Cog):
 
     def get_settings(self, name, schema: T) -> T:
         setattr(self._schema, name, schema)
-        return cast(schema, ModuleSettings(self._schema, self._db))
+        return cast(schema, ModuleSettings(self._schema, Context(None, self._db), None))
 
     @commands.group(invoke_without_command=True)
     async def n_s(self, ctx):
@@ -48,18 +48,3 @@ class Settings(commands.Cog):
         # In progress :confetti_ball:
         view = view_builder(self._schema)
         await ctx.send(view.content, view=view)
-
-
-class ModuleSettings():
-    def __init__(self, schema: Node, db: Database, path: Optional[str] = ''):
-        self.db = db
-        self.schema = schema
-        self.path = path
-
-    def __getattr__(self, key):
-        if hasattr(self.schema, key):
-            attr = getattr(self.schema, key)
-            # Add ifs here for other data stores/node types
-            if (issubclass(attr, DB_Node)):
-                return attr(self.db, self.path, key).__get__(self, self)
-            return ModuleSettings(attr, self.db, self.path + key)

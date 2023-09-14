@@ -5,7 +5,7 @@ import re
 from discord.ext.commands import Cog, Bot, command
 from neffytron.cog.baseCog import BaseCog
 # Damn it this is exactly what I wanted to avoid with this, why can't you sort everything out and let me import neffytron.nodes
-from neffytron.cog.settings.nodes import Node, DB_Value
+from neffytron.cog.settings.nodes import DB_Channel, Node, DB_Value
 import re
 import urllib.parse
 from asyncio import Future
@@ -36,16 +36,15 @@ class SimpleView(discord.ui.View):
         )
         self.add_item(button)
 
-
-class Schema(Node):
-    i = DB_Value
-
-
 class Lobby(BaseCog):
 
     name = 'Lobby'
-    schema = Schema
-    settings: Schema
+
+    class settings(Node):
+        class i(DB_Value):
+            _default = 'Not set yet'
+        class channel(DB_Value[DB_Channel]):
+            _default = None
 
     def __init__(self, bot: Bot) -> None:
         self._bot = bot
@@ -59,5 +58,6 @@ class Lobby(BaseCog):
 
     @command()
     async def test(self, ctx, val: str):
-        await ctx.send(self.settings.i if self.settings.i else 'None')
+        await ctx.send('Last command was :"' + self.settings.i + '" in ' + (self.settings.channel.mention if self.settings.channel else 'None'))
         self.settings.i = val
+        self.settings.channel = ctx.channel
