@@ -3,13 +3,11 @@ import requests
 import discord
 import re
 from discord.ext.commands import Cog, Bot, command
-from neffytron.cog.baseCog import BaseCog
+from ..cog.baseCog import BaseCog
 # Damn it this is exactly what I wanted to avoid with this, why can't you sort everything out and let me import neffytron.nodes
-from neffytron.cog.settings.nodes import DB_Channel, Node, DB_Value
+from ..cog.settings.nodes import DB_Channel, Node, DB_Value
 import re
 import urllib.parse
-from asyncio import Future
-from typing import Iterator
 
 import discord
 import requests

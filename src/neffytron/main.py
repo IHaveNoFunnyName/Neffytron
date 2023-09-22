@@ -3,7 +3,7 @@ import os
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-from neffytron import cogs as cogs
+from . import cogs as cogs
 
 
 def run():

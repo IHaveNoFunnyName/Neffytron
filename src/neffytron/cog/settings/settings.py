@@ -8,7 +8,7 @@ from discord.ext import commands
 import discord
 import os
 
-from .nodes import Context, ModuleSettings, view_builder, Node
+from .nodes import Context, ModuleSettings, Node
 
 
 class Settings(commands.Cog):
@@ -36,15 +36,16 @@ class Settings(commands.Cog):
     #           k = Something in nodes.py
     #
     # I really wanted to get this to be JSON but type hinting hated it, it needs to be static
-    T = TypeVar('T')
 
+    T = TypeVar('T')
     def get_settings(self, name, schema: T) -> T:
         setattr(self._schema, name, schema)
+        # For Context.Discord gets set at BaseCog.cog_before_invoke
         return cast(schema, ModuleSettings(self._schema, Context(None, self._db), None))
 
     @commands.group(invoke_without_command=True)
     async def n_s(self, ctx):
         # TODO: Add some way of exploring the db here
         # In progress :confetti_ball:
-        view = view_builder(self._schema)
-        await ctx.send(view.content, view=view)
+        setting = ModuleSettings(self._schema, Context(None, self._db), None)
+        await ctx.send(**setting._message())

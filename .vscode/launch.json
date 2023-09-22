@@ -8,9 +8,9 @@
             "name": "Python: main.py",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}\\main.py",
+            "program": "${workspaceFolder}\\debug.py",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": false,
         }
     ]
 }

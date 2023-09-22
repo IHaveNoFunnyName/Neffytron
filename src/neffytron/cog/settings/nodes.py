@@ -5,20 +5,6 @@ from pymongo.database import Database
 import discord
 from discord.ext.commands import Context as DiscordContext
 
-
-def view_builder(schema: 'Node', path: Optional[list[str]] = None):
-    if path is None:
-        path = []
-
-    node = schema
-    for key in path:
-        if key in dir(node):
-            node = getattr(node, key)
-        else:
-            raise ValueError
-
-    return node._view(node(), path, schema)
-
 # Add more stuff here as needed
 class Context:
     def __init__(self, discord: DiscordContext, db: Database):
@@ -26,77 +12,73 @@ class Context:
         self.db = db
 
 class Path:
-    def __init__(self, path: str, key: str):
+    def __init__(self, path: Union[list[str], str], key: str):
+        if type(path) == str:
+            if path == '':
+                path = []
+            else:
+                path = [path]
         self.path = path
         self.key = key
+
     def append(self, key: str):
-        return Path((self.path + '.' if len(self.path) else '') + self.key, key)
+        newpath = self.path.copy()
+        if len(self.key): newpath.append(self.key)
+
+        return Path(newpath, key)
+
+    def str(self, include_key: bool = True):
+        return '.'.join(self.path) + ('.' + self.key if include_key else '')
 
 
-class ModuleSettings():
-    def __init__(self, schema: 'Node', context: Context, path: Optional[Path]):
+class ModuleSettings:
+    def __init__(self, node: 'Node', context: Context, path: Optional[Path]):
         self._context = context
-        self._schema = schema
-        self._path = path if path is not None else Path('', '')
+        self._node = node
+        self._path = path if path is not None else Path([], '')
 
     def __getattr__(self, key: str):
-        if not key.startswith('_') and hasattr(self._schema, key):
-            attr = getattr(self._schema, key)
-            # Add ifs here for other data stores/node types
+        if not key.startswith('_') and hasattr(self._node, key):
+            attr = getattr(self._node, key)
             if (issubclass(attr, Leaf)):
                 return attr(self._context, self._path.append(key)).__get__(self, self)
             return ModuleSettings(attr, self._context, self._path.append(key))
         
     def __setattr__(self, key, value):
-        if(hasattr(self._schema, key)):
-            attr = getattr(self._schema, key)
-            # Add ifs here for other data stores/node types
+        if(hasattr(self._node, key)):
+            attr = getattr(self._node, key)
             if (issubclass(attr, Leaf)):
                 attr(self._context, self._path.append(key)).__set__(self, value)
             return
         else:
             super().__setattr__(key, value)
-
+    
+    def _message(self):
+        return self._node()._message()
 
 class Node:
-    # For the basic 'node' case, each view displays a list of buttons for its children
-    class _view(discord.ui.View):
-        def __init__(self, node: 'Node', path: list[str], schema: 'Node'):
-            super().__init__()
-            self.node = node
-            self.path = path
-            self.schema = schema
+    def _message(self):
+        view = discord.ui.View()
+        for child in self._dir():
+            name = getattr(self, child)._display if '_display' in dir(
+                getattr(self, child)) else child
 
-            for i, back in enumerate(path, 1):
-                self.add_item(NodeButton(back, 0, self.schema,
-                              path[:-i], style=discord.ButtonStyle.red))
+            view.add_item(NodeButton(name, 1, self))
 
-            for child in node._dir():
-                name = getattr(node, child)._display if '_display' in dir(
-                    getattr(node, child)) else child
+        content = (self.path[-1] if len([]) else '')
+        return {'content': content, 'view': view}
 
-                new_path = path.copy()
-                new_path.append(child)
-
-                self.add_item(NodeButton(name, 1, self.schema, new_path))
-
-            self.content = 'The Message Content' + \
-                (self.path[-1] if len(self.path) else '')
-
-    # Not confident to overwrite stuff for this
     def _dir(self):
         return [x for x in dir(self) if not x.startswith('_')]
 
 
-class NodeButton(discord.ui.Button[Node._view]):
-    def __init__(self, label, row, schema, path, style=discord.ButtonStyle.primary):
+class NodeButton(discord.ui.Button):
+    def __init__(self, label, row, node, style=discord.ButtonStyle.primary):
         super().__init__(style=style, label=label, row=row)
-        self.schema = schema
-        self.path = path
+        self.node = node
 
     async def callback(self, interaction: discord.Interaction):
-        next_view = view_builder(self.schema, self.path)
-        await interaction.response.edit_message(content=next_view.content, view=next_view)
+        pass
 
 # I don't think the type var actually constrains the children at all, but I guess it makes it clear what to do from the dev end
 # I could actually look up how people do interfaces in python but whatever
@@ -119,8 +101,13 @@ class Leaf(Node):
     def __init__(self, context: Context, path: Path):
         self._context = context
         self._path = path
+    
+    _default = None
+    _server = True
 
 class DB_Array(Leaf):
+    _default = []
+
     def __contains__(self, item):
         search = {}
         for key in item:
@@ -141,22 +128,13 @@ class MCGetItem(type):
 
 class DB_Value(Leaf, metaclass=MCGetItem):
     _interface = InterfaceDB
-    _default = None
-
-    class _view(Node._view):
-        def __init__(self, node, path, schema):
-            self.node = node
-            self.path = path
-            self.schema = schema
-
-            self.content = self.__get__(None, None)
 
     def __get__(self, instance, owner):
-        entry = self._context.db[self._path.path].values.find_one(
+        entry = self._context.db[((str(self._context.discord.guild.id) + '.') if self._server else '') + self._path.str(False)].kv.find_one(
             {'key': self._path.key})
         return self._interface.get(entry['value'], self._context) if entry is not None else self._default
 
     def __set__(self, instance, value):
         value = self._interface.set(value, self._context)
-        self._context.db[self._path.path].values.find_one_and_replace(
+        self._context.db[((str(self._context.discord.guild.id) + '.') if self._server else '') + self._path.str(False)].kv.find_one_and_replace(
             {'key': self._path.key}, {'key': self._path.key, 'value': value}, upsert=True)
