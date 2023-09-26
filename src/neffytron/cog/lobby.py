@@ -1,11 +1,11 @@
+from typing import Callable, Iterator, Self
 import urllib
 import requests
 import discord
 import re
-from discord.ext.commands import Cog, Bot, command
+from discord.ext.commands import Cog, Bot, command, Context
 from ..cog.baseCog import BaseCog
-# Damn it this is exactly what I wanted to avoid with this, why can't you sort everything out and let me import neffytron.nodes
-from ..cog.settings.nodes import DB_Channel, Node, DB_Value
+from ..cog.settings.nodes import Node, Val, Set, channel_interface, str_interface
 import re
 import urllib.parse
 
@@ -34,15 +34,22 @@ class SimpleView(discord.ui.View):
         )
         self.add_item(button)
 
+class Prev_Messages:
+    class message(str_interface):
+        pass
+    class channel(channel_interface):
+        pass
+
 class Lobby(BaseCog):
 
     name = 'Lobby'
 
     class settings(Node):
-        class i(DB_Value):
+        class i(str_interface):
             _default = 'Not set yet'
-        class channel(DB_Value[DB_Channel]):
+        class channel(channel_interface[Val]):
             _default = None
+        list = Set(Prev_Messages)
 
     def __init__(self, bot: Bot) -> None:
         self._bot = bot
@@ -55,7 +62,12 @@ class Lobby(BaseCog):
             await message.channel.send('', view=SimpleView(match.group(0)))
 
     @command()
-    async def test(self, ctx, val: str):
-        await ctx.send('Last command was :"' + self.settings.i + '" in ' + (self.settings.channel.mention if self.settings.channel else 'None'))
+    async def test(self, ctx: Context, val: str):
+        string = 'Last command was :"' + self.settings.i + '" in ' + (self.settings.channel.mention if self.settings.channel else 'None') + '\n'
+        string += 'All previous commands:\n'
+        for message in self.settings.list:
+            string += message.message + ' in ' + message.channel.mention + '\n'
+        await ctx.send(string)
         self.settings.i = val
         self.settings.channel = ctx.channel
+        self.settings.list.add({'message': val, 'channel': ctx.channel})
