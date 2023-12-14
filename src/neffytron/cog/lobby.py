@@ -1,4 +1,3 @@
-from typing import Callable, Iterator, Self
 import urllib
 import requests
 import discord
