@@ -209,6 +209,7 @@ class meta_array(type):
 
 # I don't think the type var actually constrains the children at all, but I guess it makes it clear what to do from the dev end
 # I could actually look up how people do interfaces in python but whatever
+
 # Base class works for strings
 T = TypeVar('T')
 
@@ -219,6 +220,12 @@ class Interface(metaclass=meta_array):
 
     def get(x: str, context: Context) -> T:
         return x
+
+    def view_row(self, row: int):
+        return discord.ui.Button(label=self._display, row=row, style=discord.ButtonStyle.secondary)
+
+    def view_modal(self):
+        pass
 
 
 class str_interface(Interface, str):
