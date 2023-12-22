@@ -5,7 +5,7 @@ import discord
 import re
 from discord.ext.commands import Cog, Bot, command, Context
 from ..cog.baseCog import BaseCog
-from ..cog.settings.nodes import Node, Val, Set, channel_interface, str_interface
+from ..cog.settings.nodes import Node, Val, Array_Unordered, channel_interface, member_interface, str_interface
 import re
 import urllib.parse
 
@@ -34,22 +34,27 @@ class SimpleView(discord.ui.View):
         )
         self.add_item(button)
 
-class Prev_Messages:
-    class message(str_interface):
-        pass
+
+class pin_channels:
     class channel(channel_interface):
         pass
+
+
+class pin_members:
+    class member(member_interface):
+        pass
+
 
 class Lobby(BaseCog):
 
     name = 'Lobby'
 
     class settings(Node):
-        class i(str_interface):
-            _default = 'Not set yet'
-        class channel(channel_interface[Val]):
-            _default = None
-        list = Set(Prev_Messages)
+        _short_desc = 'Controls auto pinning lobby links'
+
+        class auto_pin(Node):
+            channels = Array_Unordered(pin_channels)
+            members = Array_Unordered(pin_members)
 
     def __init__(self, bot: Bot) -> None:
         self._bot = bot
@@ -60,14 +65,3 @@ class Lobby(BaseCog):
         match = re.search('\s(steam:\/\/[^\s]*)', message.content)
         if match:
             await message.channel.send('', view=SimpleView(match.group(0)))
-
-    @command()
-    async def test(self, ctx: Context, val: str):
-        string = 'Last command was :"' + self.settings.i + '" in ' + (self.settings.channel.mention if self.settings.channel else 'None') + '\n'
-        string += 'All previous commands:\n'
-        for message in self.settings.list:
-            string += message.message + ' in ' + message.channel.mention + '\n'
-        await ctx.send(string)
-        self.settings.i = val
-        self.settings.channel = ctx.channel
-        self.settings.list.add({'message': val, 'channel': ctx.channel})

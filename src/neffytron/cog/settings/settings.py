@@ -22,6 +22,7 @@ class Settings(commands.Cog):
         self._db = client.neffytron
 
         class Schema(Node):
+            _description = 'View & change data for the various modules of Neffytron'
             pass
         self._schema = Schema
 
@@ -38,6 +39,7 @@ class Settings(commands.Cog):
     # I really wanted to get this to be JSON but type hinting hated it, it needs to be static
 
     T = TypeVar('T')
+
     def get_settings(self, name, schema: T) -> T:
         setattr(self._schema, name, schema)
         # For Context.Discord gets set at BaseCog.cog_before_invoke
