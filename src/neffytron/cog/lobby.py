@@ -4,7 +4,7 @@ import discord
 import re
 from discord.ext.commands import Cog, Bot, command, Context
 from ..cog.baseCog import BaseCog
-from ..cog.settings.nodes import Node, Val, Array_Unordered, channel_interface, member_interface, str_interface
+from ..cog.settings.nodes import Node, Val, Binary_Relation, channel_interface, member_interface, str_interface
 import re
 import urllib.parse
 
@@ -34,12 +34,10 @@ class SimpleView(discord.ui.View):
         self.add_item(button)
 
 
-class pin_channels:
+class auto_pin:
     class channel(channel_interface):
         pass
 
-
-class pin_members:
     class member(member_interface):
         pass
 
@@ -51,9 +49,7 @@ class Lobby(BaseCog):
     class settings(Node):
         _short_desc = 'Controls auto pinning lobby links'
 
-        class auto_pin(Node):
-            channels = Array_Unordered(pin_channels)
-            members = Array_Unordered(pin_members)
+        auto_pin = Binary_Relation(auto_pin)
 
     def __init__(self, bot: Bot) -> None:
         self._bot = bot

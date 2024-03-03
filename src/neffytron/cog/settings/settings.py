@@ -49,5 +49,5 @@ class Settings(commands.Cog):
     async def n_s(self, ctx):
         # TODO: Add some way of exploring the db here
         # In progress :confetti_ball:
-        setting = ModuleSettings(self._schema, Context(None, self._db), None)
-        await ctx.send(**setting._message())
+        setting = ModuleSettings(self._schema, Context(ctx, self._db), None)
+        await ctx.send(**setting._message(setting))
