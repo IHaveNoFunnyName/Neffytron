@@ -3,8 +3,11 @@ import requests
 import discord
 import re
 from discord.ext.commands import Cog, Bot, command, Context
+
+from neffytron.cog.settings.datasource import DS_mongo, DS_wau
+from neffytron.cog.settings.interface import Interface_str
+from neffytron.cog.settings.node import Value
 from ..cog.baseCog import BaseCog
-from ..cog.settings.nodes import Node, Val, Binary_Relation, channel_interface, member_interface, str_interface
 import re
 import urllib.parse
 
@@ -34,22 +37,12 @@ class SimpleView(discord.ui.View):
         self.add_item(button)
 
 
-class auto_pin:
-    class channel(channel_interface):
-        pass
-
-    class member(member_interface):
-        pass
-
-
 class Lobby(BaseCog):
 
-    name = 'Lobby'
+    name = "Lobby"
 
-    class settings(Node):
-        _short_desc = 'Controls auto pinning lobby links'
-
-        auto_pin = Binary_Relation(auto_pin)
+    class settings:
+        class i(Value, Interface_str, DS_mongo): ...
 
     def __init__(self, bot: Bot) -> None:
         self._bot = bot
@@ -57,6 +50,11 @@ class Lobby(BaseCog):
 
     @Cog.listener("on_message")
     async def lobby_link(self, message: Message):
-        match = re.search('\s(steam:\/\/[^\s]*)', message.content)
+        match = re.search("\s(steam:\/\/[^\s]*)", message.content)
         if match:
-            await message.channel.send('', view=SimpleView(match.group(0)))
+            await message.channel.send("", view=SimpleView(match.group(0)))
+
+    @command()
+    async def test(self, ctx: Context):
+        self.settings.i = "wau"
+        await ctx.send(self.settings.i.capitalize())

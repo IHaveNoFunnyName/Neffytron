@@ -1,6 +1,15 @@
 import asyncio
+from dataclasses import dataclass
+from typing import List, Optional, Protocol
 
 from discord.ext import commands
+from discord.ui import View, Item
+
+
+@dataclass
+class n_discord_message:
+    content: str
+    view: Optional[View]
 
 
 async def confirm(message, success, fail, ctx: commands.Context):
