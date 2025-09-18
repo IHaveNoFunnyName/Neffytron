@@ -5,9 +5,9 @@ import discord
 import re
 
 class SimpleView(discord.ui.View):
-    def __init__(self, link):
+    def __init__(self, link, display_name):
         super().__init__()
-        button = discord.ui.Button(label='Working lobby link because discord sucks', style=discord.ButtonStyle.url, url=link.replace("steam://joinlobby/", "https://neffytron.com/lobby/"))
+        button = discord.ui.Button(label=f'{display_name}\'s Lobby', style=discord.ButtonStyle.url, url=link.replace("steam://joinlobby/", "https://neffytron.com/lobby/"))
         self.add_item(button)
 
 class Lobby(Cog):
@@ -15,8 +15,8 @@ class Lobby(Cog):
         self._bot = bot
 
     @Cog.listener("on_message")
-    async def lobby_link(self, message):
+    async def lobby_link(self, message: discord.Message):
         match = re.search('(steam:\/\/joinlobby\/[^\s]*)', message.content)
         if match:
-            await message.channel.send('', view=SimpleView(match.group(0)))
+            await message.channel.send('', view=SimpleView(match.group(0), message.author.display_name))
     
