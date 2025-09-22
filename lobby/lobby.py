@@ -16,5 +16,13 @@ class Lobby(Cog):
     async def lobby_link(self, message: discord.Message):
         match = re.search('(steam:\/\/joinlobby\/[^\s]*)', message.content)
         if match:
-            await message.channel.send('', view=SimpleView(match.group(0), 'Stream Lobby' if re.search('stream', message.content, re.IGNORECASE) else f'{message.author.display_name}\'s Lobby'))
-    
+            if re.search('stream', message.content, re.IGNORECASE):
+                label = 'Stream Lobby'
+            elif message.author.bot:
+                name_match = re.search("Join (.+?)'s", message.content, re.IGNORECASE)
+                if name_match:
+                    label = f"{name_match.group(1)}'s Lobby"
+            else:
+                label = f"{message.author.display_name}'s Lobby"
+
+            await message.channel.send('', view=SimpleView(match.group(0), label))
