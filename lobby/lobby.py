@@ -16,7 +16,7 @@ class PinView(discord.ui.View):
         button.callback = callback
         self.add_item(button)
 
-pinners = set((191186486886924291, 96184605073235968, 186142996574633985, 96564257583304704 )) # hard code for now
+pinners = set((202732983910793217, 191186486886924291, 96184605073235968, 186142996574633985, 96564257583304704 )) # hard code for now
 
 class Lobby(Cog):
     def __init__(self, bot):

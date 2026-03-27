@@ -20,11 +20,11 @@ def route_lobby_redirect(path):
     return flask.redirect(f"steam://joinlobby/{path}", code=301)
 
 def run_flask_http():
-    app.run(host="0.0.0.0", port=80)
+    app.run(host="0.0.0.0", port=3000)
 
 def run_flask_https():
     certs = f"/etc/letsencrypt/live/neffytron.com"
-    app.run(host="0.0.0.0", port=443, ssl_context=(f"{certs}/fullchain.pem", f"{certs}/privkey.pem"))
+    app.run(host="0.0.0.0", port=3001, ssl_context=(f"{certs}/fullchain.pem", f"{certs}/privkey.pem"))
 
 def run(token):
     intents = discord.Intents.default()
@@ -32,7 +32,10 @@ def run(token):
     intents.members = True
 
     global bot
-    bot = commands.Bot(command_prefix="!", intents=intents)
+    bot = commands.Bot(command_prefix="!", intents=intents,
+        allowed_contexts=discord.app_commands.AppCommandContext(guild=True, dm_channel=True, private_channel=True),
+        allowed_installs=discord.app_commands.AppInstallationType(guild=True, user=True),
+    )
 
     @bot.event
     async def on_ready():
