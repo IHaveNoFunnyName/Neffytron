@@ -24,7 +24,7 @@ class Lobby(Cog):
 
     @Cog.listener("on_message")
     async def lobby_link(self, message: discord.Message):
-        match = re.search('(steam:\/\/joinlobby\/[^\s]*)', message.content)
+        match = re.search('(steam:\\/\\/joinlobby\\/[^\\s]*)', message.content)
         if match:
             if re.search('stream', message.content, re.IGNORECASE):
                 label = 'Stream Lobby'
@@ -37,15 +37,20 @@ class Lobby(Cog):
 
             await message.channel.send('', view=SimpleView(match.group(0), label))
 
-    @app_commands.command(name="lobby")
+    @app_commands.command(name="lobby", description="Working lobby link because discord sucks")
+    @app_commands.describe(link="Steam lobby link", label="(Optional) Defaults to \"<Discord Name>'s Lobby\")")
+    @app_commands.allowed_installs(guilds=True, users=True)
     async def lobby_command(self, interaction: discord.Interaction, link: str, label: str=None):
-        match = re.search('(steam:\/\/joinlobby\/[^\s]*)', link)
+        match = re.search('(steam:\\/\\/joinlobby\\/[^\\s]*)', link)
 
         if not match:
             await interaction.response.send_message('Invalid lobby link.', ephemeral=True)
             return
+        
+        if not label:
+            label = f"{interaction.user.display_name}'s Lobby"
 
-        response = await interaction.response.send_message('', view = SimpleView(match.group(0), label or f"{interaction.user.display_name}'s Lobby"))
+        response = await interaction.response.send_message('', view=SimpleView(match.group(0), label=label))
         if interaction.user.id in pinners:
             async def pin_callback(interaction: discord.Interaction):
                 for p in await interaction.channel.pins():

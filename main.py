@@ -8,9 +8,10 @@ import flask
 
 # Do I have to do this? Is there a way to like have python default import a .py? maybe that's what __init__.py is for?
 # I don't understand how this wasn't immediately answered via google.
-from settings.settings import Settings
-from lobby.lobby import Lobby
-from sync.sync import Sync
+from cogs.settings.settings import Settings
+from cogs.lobby.lobby import Lobby
+from cogs.sync.sync import Sync
+from cogs.utils.utils import Utils
 
 app = flask.Flask(__name__)
 global bot
@@ -43,13 +44,17 @@ def run(token):
         await bot.add_cog(Settings(bot))
         await bot.add_cog(Lobby(bot))
         await bot.add_cog(Sync(bot))
+        await bot.add_cog(Utils(bot))
         print('Set up cogs')
     bot.run(token)
 
 if __name__ == "__main__":
     load_dotenv()
     http_thread = threading.Thread(target=run_flask_http, daemon=True)
-    https_thread = threading.Thread(target=run_flask_https, daemon=True)
     http_thread.start()
-    https_thread.start()
+    # try:
+    #     https_thread = threading.Thread(target=run_flask_https, daemon=True)
+    #     https_thread.start()
+    # except Exception as e:
+    #     print(f"Failed to start HTTPS thread: {e}")
     run(os.getenv('TOKEN'))
